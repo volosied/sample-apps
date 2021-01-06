@@ -1,0 +1,8 @@
+<faces-config version="2.3">
+
+<!-- Not Picked up By JSP -->
+  <!-- <application>
+        <el-resolver>myapp.CustomELResolver</el-resolver>
+  </application> -->
+
+</faces-config>
