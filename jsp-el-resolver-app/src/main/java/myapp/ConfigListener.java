@@ -14,7 +14,7 @@ public class ConfigListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent event) {
         ServletContext servletContext = event.getServletContext(); 
         JspApplicationContext jspContext = JspFactory.getDefaultFactory().getJspApplicationContext(servletContext); 
-        jspContext.addELResolver(new CustomELResolver()); 
+        jspContext.addELResolver(new ScopedAttributeCustomELResolver()); 
     } 
 
 
