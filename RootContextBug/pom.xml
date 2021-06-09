@@ -1,0 +1,1150 @@
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.eclipse.ee4j</groupId>
+    <artifactId>RootContextBug</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+    <name>Eclipse Cargo Tracker</name>
+    <description>
+        The project demonstrates how you can develop applications with the Jakarta EE platform using widely
+        adopted architectural best practices like Domain-Driven Design (DDD).
+    </description>
+    <url>https://projects.eclipse.org/projects/ee4j.cargotracker/</url>
+
+    <organization>
+        <name>Eclipse Foundation</name>
+        <url>https://www.eclipse.org/org/foundation/</url>
+    </organization>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/eclipse-ee4j/cargotracker/issues</url>
+    </issueManagement>
+
+    <properties>
+        <!-- Global Maven settings -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.report.sourceEncoding>UTF-8</project.report.sourceEncoding>
+
+        <maven.compiler.release>11</maven.compiler.release>
+
+        <!-- Official Maven Plugins -->
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <maven-war-plugin.version>3.3.1</maven-war-plugin.version>
+        <maven-dependency-plugin.version>3.1.2</maven-dependency-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
+        <maven-surefire-report-plugin.version>3.0.0-M5</maven-surefire-report-plugin.version>
+
+        <!-- Cargo maven plugin -->
+        <cargo-maven3-plugin.version>1.9.4</cargo-maven3-plugin.version>
+
+        <!-- Jakarta EE API -->
+        <jakartaee-api.version>8.0.0</jakartaee-api.version>
+
+        <!-- Arquillian BOM -->
+        <arquillian-bom.version>1.6.0.Final</arquillian-bom.version>
+        <!-- Test Utilities -->
+        <junit.version>4.13.2</junit.version>
+        <hamcrest.version>2.2</hamcrest.version>
+        <mockito.version>3.11.0</mockito.version>
+        <assertj.version>3.19.0</assertj.version>
+        <json-path.version>2.6.0</json-path.version>
+
+        <!-- Jacoco code coverage report -->
+        <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
+
+        <!-- By default, skip tests -->
+        <skipTests>true</skipTests>
+
+        <!-- Payara server -->
+        <payara.version>5.2021.4</payara.version>
+        <arquillian-payara.version>2.4.2</arquillian-payara.version>
+        <tyrus-client.version>1.17</tyrus-client.version>
+
+        <!-- Wildfly server -->
+        <wildfly.version>23.0.0.Final</wildfly.version>
+        <wildfly-maven-plugin.version>2.1.0.Beta1</wildfly-maven-plugin.version>
+        <wildfly-arquillian.version>3.0.1.Final</wildfly-arquillian.version>
+        <!-- websockets-jsr and resteasy for client, aligned with Wildfly version. -->
+        <undertow-websockets-jsr.version>2.2.3.Final</undertow-websockets-jsr.version>
+        <resteasy.version>3.14.0.Final</resteasy.version>
+        <jackson.version>2.11.3</jackson.version>
+
+        <!-- OpenLiberty server -->
+        <liberty.runtime.version>21.0.0.5</liberty.runtime.version>
+        <liberty-maven-plugin.version>3.3.4</liberty-maven-plugin.version>
+        <arquillian-liberty.version>1.0.8</arquillian-liberty.version>
+        <cxf.version>3.4.3</cxf.version>
+
+        <!-- Application properties -->
+        <webapp.databaseTempDir>/tmp</webapp.databaseTempDir>
+        <webapp.graphTraversalUrl>
+            http://localhost:8080/cargo-tracker/rest/graph-traversal/shortest-path
+        </webapp.graphTraversalUrl>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Jakarta EE API -->
+            <dependency>
+                <groupId>jakarta.platform</groupId>
+                <artifactId>jakarta.jakartaee-api</artifactId>
+                <version>${jakartaee-api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>42.2.20</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <!-- Arquillian Bill Of Management used to reduce collision between testing
+                dependencies. Using a dependency manager we don't need to specify the version
+                of each Arquillian dependency. -->
+            <dependency>
+                <groupId>org.jboss.arquillian</groupId>
+                <artifactId>arquillian-bom</artifactId>
+                <version>${arquillian-bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.hamcrest/hamcrest -->
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest</artifactId>
+                <version>${hamcrest.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.assertj/assertj-core -->
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- JSON path -->
+            <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
+            <dependency>
+                <groupId>com.jayway.jsonpath</groupId>
+                <artifactId>json-path</artifactId>
+                <version>${json-path.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path-assert -->
+            <dependency>
+                <groupId>com.jayway.jsonpath</groupId>
+                <artifactId>json-path-assert</artifactId>
+                <version>${json-path.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+        </dependency>
+
+        <!-- H2 database -->
+        <!--        <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                    <version>1.4.200</version>
+                    <scope>runtime</scope>
+                </dependency>-->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
+        <!-- Required by Java 9+ -->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.4</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Third-party dependencies -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.12.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.primefaces</groupId>
+            <artifactId>primefaces</artifactId>
+            <version>8.0</version>
+        </dependency>
+
+                    <!-- https://mvnrepository.com/artifact/org.glassfish/javax.faces -->
+                <!-- <dependency>
+                    <groupId>org.glassfish</groupId>
+                    <artifactId>javax.faces</artifactId>
+                    <version>2.3.9</version>
+                </dependency> -->
+
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Arquillian dependencies -->
+        <dependency>
+            <groupId>org.jboss.arquillian.junit</groupId>
+            <artifactId>arquillian-junit-container</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Resolvers are needed in the Arquillian tests. This is used for adding
+            all the runtime dependencies inside a testing war. -->
+        <dependency>
+            <groupId>org.jboss.shrinkwrap.resolver</groupId>
+            <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.ow2.asm</groupId>
+                    <artifactId>asm</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path-assert</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>RootContextBug</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>${maven-war-plugin.version}</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <filteringDeploymentDescriptors>true</filteringDeploymentDescriptors>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <skipTests>${skipTests}</skipTests>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <excludedGroups>org.eclipse.cargotracker.IntegrationTests</excludedGroups>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven-failsafe-plugin.version}</version>
+                <configuration>
+                    <!--<forkCount>1</forkCount>
+                    <reuseForks>false</reuseForks>-->
+                    <skipITs>${skipTests}</skipITs>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <groups>org.eclipse.cargotracker.IntegrationTests</groups>
+                    <excludedGroups>!org.eclipse.cargotracker.IntegrationTests</excludedGroups>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.cargo</groupId>
+                        <artifactId>cargo-maven3-plugin</artifactId>
+                        <version>${cargo-maven3-plugin.version}</version>
+                        <configuration>
+                            <container>
+                                <containerId>payara</containerId>
+                                <artifactInstaller>
+                                    <groupId>fish.payara.distributions</groupId>
+                                    <artifactId>payara</artifactId>
+                                    <version>${payara.version}</version>
+                                </artifactInstaller>
+                            </container>
+                            <configuration>
+                                <properties>
+                                    <cargo.remote.password></cargo.remote.password>
+                                </properties>
+                            </configuration>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>payara-remote</id>
+            <build>
+                <plugins>
+                    <!-- To deploying to a running Payara server. -->
+                    <!-- run: mvn package cargo:deploy -->
+                    <plugin>
+                        <groupId>org.codehaus.cargo</groupId>
+                        <artifactId>cargo-maven3-plugin</artifactId>
+                        <version>${cargo-maven3-plugin.version}</version>
+                        <configuration>
+                            <container>
+                                <containerId>payara</containerId>
+                                <type>remote</type>
+                            </container>
+                            <configuration>
+                                <type>runtime</type>
+                                <properties>
+                                    <cargo.remote.password></cargo.remote.password>
+                                </properties>
+                            </configuration>
+                        </configuration>
+                        <!-- provides JSR88 client API to deploy on Glassfish/Payara Server -->
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.glassfish.main.deployment</groupId>
+                                <artifactId>deployment-client</artifactId>
+                                <version>5.1.0</version>
+                            </dependency>
+                            <!-- jaxb is required when using Java 11 with cargo maven plugin -->
+                            <dependency>
+                                <groupId>org.glassfish.jaxb</groupId>
+                                <artifactId>jaxb-runtime</artifactId>
+                                <version>2.3.4</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>wildfly</id>
+            <properties></properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-databind</artifactId>
+                    <version>${jackson.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                    <version>${jackson.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>resteasy-jackson2-provider</artifactId>
+                    <version>${resteasy.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.datatype</groupId>
+                    <artifactId>jackson-datatype-jsr310</artifactId>
+                    <version>${jackson.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>com.fasterxml.jackson.datatype</groupId>
+                    <artifactId>jackson-datatype-jdk8</artifactId>
+                    <version>${jackson.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>add-source</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>add-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>src/main/java-wildfly</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- The WildFly plugin deploys your war to a local WildFly container -->
+                    <!-- To use, run: mvn package wildfly:deploy -->
+                    <plugin>
+                        <groupId>org.wildfly.plugins</groupId>
+                        <artifactId>wildfly-maven-plugin</artifactId>
+                        <version>${wildfly-maven-plugin.version}</version>
+                        <configuration>
+                            <server-config>standalone-full.xml</server-config>
+                            <!--<scripts>
+                                 <script>config.cli</script>
+                            </scripts>-->
+                            <!-- if a wildfly.home property is not present, firstly it will download
+                                a copy of wildfly distribution automatically -->
+                            <!-- also fetch from jbossHome -->
+                            <!-- <jossHome>${env.WILDFLY_HOME}</jbossHome>-->
+
+                            <!-- control remote wildfly server -->
+                            <!-- <hostname></hostname>
+                            <port></port>
+                            <username></username>
+                            <password></password> -->
+
+                            <!-- or set a wildfly.id property to add a server in settings.xml -->
+                            <!--<id>wildfly-svr</id> -->
+
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- use maven liberty plugin to run this application on OpenLiberty:
+            mvn clean compile liberty:create dependency:copy liberty:run -Popenliberty -Dmaven.test.skip=true
+        -->
+        <profile>
+            <id>openliberty</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <!-- <configuration>
+                            <excludes>
+                                <exclude>org/eclipse/cargotracker/infrastructure/messaging/JmsQueueNames.java</exclude>
+                                <exclude>**/JmsResourcesSetup.*</exclude>
+                                <exclude>**/DatabaseSetup.*</exclude>
+                            </excludes>
+                        </configuration> -->
+                    </plugin>
+                    <!--
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>add-source</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>add-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>src/main/java-openliberty</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    -->
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>replace-source-file</id>
+                                <phase>process-sources</phase>
+                                <!-- <configuration>
+                                    <target>
+                                        <move file="src/main/java/org/eclipse/cargotracker/infrastructure/messaging/JmsQueueNames.java"
+                                              tofile="src/main/java/org/eclipse/cargotracker/infrastructure/messaging/JmsQueueNames.java.moved"/>
+                                        <copy file="src/main/java-openliberty/org/eclipse/cargotracker/infrastructure/messaging/JmsQueueNames.java"
+                                              todir="src/main/java/org/eclipse/cargotracker/infrastructure/messaging/"/>
+                                    </target>
+                                </configuration> -->
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>restore-source-file</id>
+                                <phase>compile</phase>
+                                <configuration>
+                                    <!-- <target>
+                                        <move file="src/main/java/org/eclipse/cargotracker/infrastructure/messaging/JmsQueueNames.java.moved"
+                                              tofile="src/main/java/org/eclipse/cargotracker/infrastructure/messaging/JmsQueueNames.java"/>
+                                    </target> -->
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.2.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy-persistenceXml</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <overwrite>true</overwrite>
+                                    <outputDirectory>${basedir}/target/classes/META-INF</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/resources-openliberty/</directory>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>${maven-dependency-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>copy</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.postgresql</groupId>
+                                    <artifactId>postgresql</artifactId>
+                                    <type>jar</type>
+                                    <overWrite>false</overWrite>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/liberty/wlp/usr/shared/resources
+                            </outputDirectory>
+                        </configuration>
+                    </plugin>
+                    <!-- Enable liberty-maven-plugin -->
+                    <plugin>
+                        <groupId>io.openliberty.tools</groupId>
+                        <artifactId>liberty-maven-plugin</artifactId>
+                        <version>${liberty-maven-plugin.version}</version>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>arq-payara-managed</id>
+            <properties>
+                <skipTests>false</skipTests>
+                <payara.home>${project.build.directory}/payara5</payara.home>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>fish.payara.arquillian</groupId>
+                    <artifactId>payara-client-ee8</artifactId>
+                    <version>${arquillian-payara.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-container-grizzly-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <!-- Payara Server Container adaptor -->
+                <dependency>
+                    <groupId>fish.payara.arquillian</groupId>
+                    <artifactId>arquillian-payara-server-managed</artifactId>
+                    <version>${arquillian-payara.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>${maven-dependency-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unpack</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>fish.payara.distributions</groupId>
+                                            <artifactId>payara</artifactId>
+                                            <version>${payara.version}</version>
+                                            <type>zip</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <payara.home>${project.build.directory}/payara5</payara.home>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>arq-payara-remote</id>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-container-grizzly-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>fish.payara.arquillian</groupId>
+                    <artifactId>arquillian-payara-server-remote</artifactId>
+                    <version>${arquillian-payara.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe-plugin.version}</version>
+                        <configuration>
+                            <!-- This needs tuning -->
+                            <!--<systemPropertyVariables>
+                                <arquillian.launch>glassfish-remote</arquillian.launch>
+                            </systemPropertyVariables>-->
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>arq-payara-embedded</id>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>fish.payara.extras</groupId>
+                    <artifactId>payara-embedded-all</artifactId>
+                    <version>${payara.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>fish.payara.arquillian</groupId>
+                    <artifactId>arquillian-payara-server-embedded</artifactId>
+                    <version>${arquillian-payara.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>arq-payara-micro</id>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+            <dependencies>
+
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-container-grizzly-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+
+                <!-- Payara Micro Managed Container Adaptor -->
+                <dependency>
+                    <groupId>fish.payara.arquillian</groupId>
+                    <artifactId>arquillian-payara-micro-managed</artifactId>
+                    <version>${arquillian-payara.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>${maven-dependency-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unpack</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>fish.payara.extras</groupId>
+                                            <artifactId>payara-micro</artifactId>
+                                            <version>${payara.version}</version>
+                                            <type>jar</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}</outputDirectory>
+                                            <destFileName>payara-micro.jar</destFileName>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <payara.microJar>${project.build.directory}/payara-micro.jar</payara.microJar>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+
+            <!-- An optional Arquillian testing profile that executes tests in your
+                WildFly instance -->
+            <!-- This profile will start a new WildFly instance, and execute the test,
+                shutting it down when done -->
+            <!-- Run with: mvn clean verify -Parq-wildfly-managed -->
+            <id>arq-wildfly-managed</id>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+            <dependencies>
+                <!--<dependency>
+                    <groupId>io.undertow</groupId>
+                    <artifactId>undertow-websockets-jsr</artifactId>
+                    <version>${undertow-websockets-jsr.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.threads</groupId>
+                    <artifactId>jboss-threads</artifactId>
+                    <version>2.4.0.Final</version>
+                    <scope>test</scope>
+                </dependency>-->
+
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-container-grizzly-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <!-- TESTS -->
+                <!-- JAXRS test need the dependency:resteasy-client -->
+                <!-- Import the RestEasy Client and jackson2/json-binding/json-p provider, we use test scope
+                    as we need that for test purposes -->
+                <dependency>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>resteasy-client</artifactId>
+                    <version>${resteasy.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>resteasy-jackson2-provider</artifactId>
+                    <version>${resteasy.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.wildfly.arquillian</groupId>
+                    <artifactId>wildfly-arquillian-container-managed</artifactId>
+                    <version>${wildfly-arquillian.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>${maven-dependency-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unpack</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.wildfly</groupId>
+                                            <artifactId>wildfly-dist</artifactId>
+                                            <version>${wildfly.version}</version>
+                                            <type>zip</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe-plugin.version}</version>
+                        <configuration>
+                            <environmentVariables>
+                                <JBOSS_HOME>${project.build.directory}/wildfly-${wildfly.version}</JBOSS_HOME>
+                            </environmentVariables>
+                            <systemPropertyVariables>
+                                <jboss.server.config.file.name>standalone-full.xml</jboss.server.config.file.name>
+                                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- An optional Arquillian testing profile that executes tests in a remote
+                WildFly instance -->
+            <!-- Run with: mvn clean test -Parq-wildfly-remote -->
+            <id>arq-wildfly-remote</id>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-container-grizzly-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>resteasy-client</artifactId>
+                    <version>${resteasy.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>resteasy-jackson2-provider</artifactId>
+                    <version>${resteasy.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.wildfly.arquillian</groupId>
+                    <artifactId>wildfly-arquillian-container-remote</artifactId>
+                    <version>${wildfly-arquillian.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe-plugin.version}</version>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <!--<arquillian.launch>wildfly-remote</arquillian.launch>-->
+                                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- An optional Arquillian testing profile that executes tests in your
+                WildFly instance -->
+            <!-- Run with: mvn clean test -Parq-wildfly-embedded -->
+            <id>arq-wildfly-embedded</id>
+            <properties>
+                <skipTests>false</skipTests>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.glassfish.tyrus</groupId>
+                    <artifactId>tyrus-container-grizzly-client</artifactId>
+                    <version>${tyrus-client.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>resteasy-client</artifactId>
+                    <version>${resteasy.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.resteasy</groupId>
+                    <artifactId>resteasy-jackson2-provider</artifactId>
+                    <version>${resteasy.version}</version>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.wildfly.arquillian</groupId>
+                    <artifactId>wildfly-arquillian-container-embedded</artifactId>
+                    <version>${wildfly-arquillian.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>${maven-dependency-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>unpack</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.wildfly</groupId>
+                                            <artifactId>wildfly-dist</artifactId>
+                                            <version>${wildfly.version}</version>
+                                            <type>zip</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe-plugin.version}</version>
+                        <configuration>
+                            <environmentVariables>
+                                <JBOSS_HOME>${project.build.directory}/wildfly-${wildfly.version}</JBOSS_HOME>
+                            </environmentVariables>
+                            <systemPropertyVariables>
+                                <jboss.server.config.file.name>standalone-full.xml</jboss.server.config.file.name>
+                                <serverConfig>standalone-full.xml</serverConfig>
+                                <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>coverage</id>
+            <properties>
+                <jacoco.version>0.8.6</jacoco.version>
+                <arquillian-jacoco.version>1.1.0</arquillian-jacoco.version>
+            </properties>
+            <dependencies>
+                <!--<dependency>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>org.jacoco.core</artifactId>
+                    <version>${jacoco.version}</version>
+                    <scope>test</scope>
+                </dependency>-->
+                <dependency>
+                    <groupId>org.jboss.arquillian.extension</groupId>
+                    <artifactId>arquillian-jacoco-with-asm</artifactId>
+                    <version>${arquillian-jacoco.version}</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco-maven-plugin.version}</version>
+                        <configuration>
+                            <excludes>
+                                <!-- excludes the resources not to calculated in coverage report-->
+                                <exclude>**/*Resource.*</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>default-prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>default-report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                            <!--                            <execution>
+                                                            <id>default-check</id>
+                                                            <goals>
+                                                                <goal>check</goal>
+                                                            </goals>
+                                                            <configuration>
+                                                                <rules>
+                                                                    <rule>
+                                                                        <element>BUNDLE</element>
+                                                                        <limits>
+                                                                            <limit>
+                                                                                <counter>COMPLEXITY</counter>
+                                                                                <value>COVEREDRATIO</value>
+                                                                                <minimum>0.60</minimum>
+                                                                            </limit>
+                                                                        </limits>
+                                                                    </rule>
+                                                                </rules>
+                                                            </configuration>
+                                                        </execution>-->
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
